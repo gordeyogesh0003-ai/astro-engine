@@ -3,304 +3,451 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="Evidence-Based Vedic Prediction Engine", layout="centered"
+    page_title="Universal Evidence-Based Astro Engine", layout="wide"
 )
 
-st.title("⚡ AI-Integrated Vedic Astro Engine")
-st.caption(
-    "Frameworks: Parashari (BPHS) | Jaimini (K.N. Rao) | KP Cuspal | V.P. Goel"
-    " Rules"
-)
+# --- 1. Multi-Language Dictionary Engine ---
+LANG_PACK = {
+    "English": {
+        "title": "⚡ Evidence-Based Vedic Astro Engine",
+        "subtitle": (
+            "Integrated Frameworks: Parashari (BPHS) | Jaimini (K.N. Rao) | KP"
+            " Cuspal | V.P. Goel Rules"
+        ),
+        "input_header": "1. Enter Birth Data & Coordinates",
+        "dob": "Date of Birth",
+        "tob": "Time of Birth",
+        "hour": "Hour",
+        "min": "Minute",
+        "city": "Birth City / Place",
+        "lat": "Latitude",
+        "lon": "Longitude",
+        "btn": "🔮 Generate Complete Astrological & Karmic Matrix",
+        "tab1": "🔍 Comprehensive Predictions",
+        "tab2": "🪐 Conjunctions & Parashari Aspects (PAC)",
+        "tab3": "📊 Jaimini & BPHS Degrees",
+        "tab4": "⏱️ Vimshottari & Double Transit",
+        "core_identity": "1. Core Soul Identity & Karmic Path (Atmakaraka)",
+        "career_destiny": "2. Professional Mastery & Wealth (Amatyakaraka)",
+        "spouse_dynamics": "3. Partnership & Spousal Blueprint (Darakaraka)",
+        "avastha_header": "4. Critical BPHS Planetary States (Avasthas)",
+        "ak_saturn": (
+            "**Saturn as Atmakaraka:** Your soul's evolutionary task is"
+            " grounded in endurance, discipline, and building permanent,"
+            " unshakeable foundations. Saturn demands patience and dismantling"
+            " ego. Early career trials yield unmatched authority and public"
+            " respect in mature cycles."
+        ),
+        "amk_sun": (
+            "**Sun as Amatyakaraka (Career Indicator):** High inclination"
+            " toward executive leadership, advisory roles, strategic management,"
+            " and sovereign entrepreneurial ventures. Routine subordinate work"
+            " drains vitality; you excel where intellectual autonomy is"
+            " supreme."
+        ),
+        "dk_mercury": (
+            "**Mercury as Darakaraka (Partner Indicator):** Your life partner"
+            " possesses a sharp, analytical, and inquisitive mind. The"
+            " relationship thrives on open intellectual dialogue, shared"
+            " commercial/creative ideas, and mutual mental stimulation."
+        ),
+        "budhaditya": (
+            "**Budhaditya Yoga (Sun + Mercury):** Enhances razor-sharp"
+            " analytical capabilities, intellectual independence, and strategic"
+            " architectural reasoning."
+        ),
+        "sunsat": (
+            "**Sun + Saturn Union:** Produces intense resilience. Fosters the"
+            " ability to execute massive multi-year projects without requiring"
+            " short-term external validation."
+        ),
+    },
+    "मराठी": {
+        "title": "⚡ वैदिक ज्योतिष प्रेडिक्शन इंजिन",
+        "subtitle": (
+            "एकत्रित पद्धती: पराशरी (BPHS) | जैमिनी (के.एन. राव) | केपी कस्पल |"
+            " व्ही.पी. गोयल नियम"
+        ),
+        "input_header": "१. जन्म तपशील आणि रेखांश-अक्षांश",
+        "dob": "जन्मतारीख",
+        "tob": "जन्म वेळ",
+        "hour": "तास",
+        "min": "मिनिट",
+        "city": "जन्म शहर / ठिकाण",
+        "lat": "अक्षांश (Latitude)",
+        "lon": "रेखांश (Longitude)",
+        "btn": "🔮 संपूर्ण सखोल भविष्यकथन आणि कुंडली विश्लेषण करा",
+        "tab1": "🔍 सखोल भविष्यकथन",
+        "tab2": "🪐 युती आणि पराशरी दृष्टी (PAC विश्लेषण)",
+        "tab3": "📊 जैमिनी चर कारके आणि अंश",
+        "tab4": "⏱️ विंशोत्तरी दशा आणि गोचर",
+        "core_identity": "१. मूळ आत्मा, स्वभाव आणि जीवन ध्येय (आत्मकारक)",
+        "career_destiny": "२. करिअर, अधिकार आणि धनप्राप्ती (अमात्यकारक)",
+        "spouse_dynamics": "३. जोडीदाराचा स्वभाव आणि वैवाहिक जीवन (दाराकारक)",
+        "avastha_header": "४. महत्त्वाच्या पराशरी ग्रहावस्था (BPHS Avasthas)",
+        "ak_saturn": (
+            "**शनी आत्मकारक:** तुमच्या आत्म्याचा मूळ मार्ग कठोर परिश्रम, शिस्त,"
+            " संयम आणि सत्यनिष्ठेवर आधारित आहे. सुरुवातीला विलंब किंवा संघर्ष"
+            " सहन करावा लागला तरी उत्तरार्धात शाश्वत आणि मोठे यश प्राप्त होते."
+        ),
+        "amk_sun": (
+            "**सूर्य अमात्यकारक (करिअर):** प्रशासकीय नेतृत्व, सल्लागार पद,"
+            " संस्थात्मक धोरण आणि स्वतःचे स्वतंत्र कार्यक्षेत्र यात मोठी"
+            " प्रगती. स्वतःचे बौद्धिक स्वातंत्र्य असणाऱ्या ठिकाणी तुम्ही सर्वोत्तम"
+            " कामगिरी कराल."
+        ),
+        "dk_mercury": (
+            "**बुध दाराकारक (जोडीदार):** जोडीदार अतिशय बुद्धिमान, संवादप्रिय,"
+            " हजरजबाबी आणि व्यावहारिक असेल. बौद्धिक देवाणघेवाण नात्याचा मजबूत पाया"
+            " ठरेल."
+        ),
+        "budhaditya": (
+            "**बुधादित्य योग (सूर्य + बुध):** तीव्र बुद्धिमत्ता, विश्लेषणात्मक"
+            " क्षमता आणि धोरणात्मक निर्णयक्षमता वाढवणारा अत्यंत शुभ योग."
+        ),
+        "sunsat": (
+            "**सूर्य + शनी युती:** प्रचंड सहनशीलता आणि दीर्घकालीन उद्दिष्टे"
+            " पूर्ण करण्याची आंतरिक ताकद प्रदान करते."
+        ),
+    },
+    "हिंदी": {
+        "title": "⚡ वैदिक ज्योतिष प्रेडिक्शन इंजन",
+        "subtitle": (
+            "समेकित सिद्धांत: पाराशरी (BPHS) | जैमिनी (के.एन. राव) | केपी |"
+            " वी.पी. गोयल"
+        ),
+        "input_header": "१. जन्म विवरण और अक्षांश/देशांतर",
+        "dob": "जन्म तिथि",
+        "tob": "जन्म समय",
+        "hour": "घंटा",
+        "min": "मिनट",
+        "city": "जन्म स्थान / शहर",
+        "lat": "अक्षांश (Latitude)",
+        "lon": "देशांतर (Longitude)",
+        "btn": "🔮 संपूर्ण कुंडली और भविष्यफल विश्लेषण उत्पन्न करें",
+        "tab1": "🔍 विस्तृत भविष्यफल",
+        "tab2": "🪐 युति और पाराशरी दृष्टि (PAC)",
+        "tab3": "📊 जैमिनी चर कारक और ग्रह अंश",
+        "tab4": "⏱️ विंशोत्तरी दशा और गोचर",
+        "core_identity": "१. आत्मिक उद्देश्य और जीवन पथ (आत्मकारक)",
+        "career_destiny": "२. आजीविका, पद और धन संपदा (अमात्यकारक)",
+        "spouse_dynamics": "३. जीवनसाथी का स्वभाव और वैवाहिक योग (दाराकारक)",
+        "avastha_header": "४. पाराशर ग्रहावस्था विश्लेषण (BPHS Avasthas)",
+        "ak_saturn": (
+            "**शनि आत्मकारक:** जीवन का प्रमुख उद्देश्य अनुशासन, सत्य, धैर्य और"
+            " दीर्घकालिक निर्माण है। शुरुआती दौर में संघर्ष हो सकता है, परंतु"
+            " अंततः स्थायी अधिकार प्राप्त होता है।"
+        ),
+        "amk_sun": (
+            "**सूर्य अमात्यकारक:** नेतृत्व, प्रशासनिक कार्य, उच्च स्तरीय"
+            " परामर्श और स्वतंत्र व्यावसायिक उद्यम में श्रेष्ठ सफलता का योग।"
+        ),
+        "dk_mercury": (
+            "**बुध दाराकारक:** जीवनसाथी तीक्ष्ण बुद्धि वाला, संवाद-प्रिय और"
+            " व्यावहारिक स्वभाव का होगा। वैचारिक तालमेल श्रेष्ठ रहेगा।"
+        ),
+        "budhaditya": (
+            "**बुधादित्य योग (सूर्य + बुध):** उत्कृष्ट तार्किक क्षमता,"
+            " रणनीतिक दृष्टि और बौद्धिक प्रतिष्ठा प्रदान करता है।"
+        ),
+        "sunsat": (
+            "**सूर्य + शनि युति:** गहन धैर्य और बिना किसी बाहरी सहारे के बड़े"
+            " लक्ष्यों को प्राप्त करने की क्षमता।"
+        ),
+    },
+    "ગુજરાતી": {
+        "title": "⚡ વૈદિક જ્યોતિષ પ્રિડિક્શન એન્જિન",
+        "subtitle": (
+            "સિદ્ધાંતો: પરાશરી (BPHS) | જૈમિની (કે.એન. રાવ) | કેપી પદ્ધતિ"
+        ),
+        "input_header": "૧. જન્મ વિગતો",
+        "dob": "જન્મ તારીખ",
+        "tob": "જન્મ સમય",
+        "hour": "કલાક",
+        "min": "મિનિટ",
+        "city": "જન્મ સ્થળ",
+        "lat": "અક્ષાંશ (Latitude)",
+        "lon": "રેખાંશ (Longitude)",
+        "btn": "🔮 સંપૂર્ણ જ્યોતિષીય વિશ્લેષણ મેળવો",
+        "tab1": "🔍 ઊંડાણપૂર્વક આગાહી",
+        "tab2": "🪐 યુતિ અને પરાશરી દ્રષ્ટિ",
+        "tab3": "📊 જૈમિની કારક અને અંશ",
+        "tab4": "⏱️ વિંશોત્તરી દશા અને ગોચર",
+        "core_identity": "૧. આત્મા અને જીવનનું ધ્યેય (આત્મકારક)",
+        "career_destiny": "૨. કારકિર્દી અને સંપત્તિ (અમાત્યકારક)",
+        "spouse_dynamics": "૩. જીવનસાથીનો સ્વભાવ (દારકારક)",
+        "avastha_header": "૪. ગ્રહ અવસ્થા વિશ્લેષણ",
+        "ak_saturn": (
+            "**શનિ આત્મકારક:** શિસ્ત, ધૈર્ય અને પરિશ્રમ દ્વારા કાયમી સફળતા."
+        ),
+        "amk_sun": (
+            "**સૂર્ય અમાત્યકારક:** નેતૃત્વ, કન્સલ્ટિંગ અને સ્વતંત્ર ઉદ્યોગમાં"
+            " શ્રેષ્ઠ સફળતા."
+        ),
+        "dk_mercury": (
+            "**બુધ દારકારક:** જીવનસાથી બુદ્ધિશાળી અને ઉત્તમ સંવાદ કુશળતા"
+            " ધરાવનાર હશે."
+        ),
+        "budhaditya": "**બુધાદિત્ય યોગ:** ઉત્તમ તાર્કિક ક્ષમતા અને માન-સન્માન.",
+        "sunsat": "**સૂર્ય + શનિ યુતિ:** અડગ ધૈર્ય અને સહનશક્તિ.",
+    },
+    "தமிழ்": {
+        "title": "⚡ வேத ஜோதிட கணிப்பு இயந்திரம்",
+        "subtitle": "பராசர (BPHS) | ஜெய்மினி (K.N. ராவ்) | KP அமைப்பு",
+        "input_header": "1. பிறப்பு விவரங்கள்",
+        "dob": "பிறந்த தேதி",
+        "tob": "பிறந்த நேரம்",
+        "hour": "மணி",
+        "min": "நிமிடம்",
+        "city": "பிறந்த ஊர்",
+        "lat": "அட்சரேகை (Latitude)",
+        "lon": "தீர்க்கரேகை (Longitude)",
+        "btn": "🔮 முழுமையான ஜாதக பலன்களைக் காண்க",
+        "tab1": "🔍 விரிவான பலன்கள்",
+        "tab2": "🪐 சேர்க்கை & பார்வைகள்",
+        "tab3": "📊 காரகங்கள் & பாகைகள்",
+        "tab4": "⏱️ தசா & கோச்சாரம்",
+        "core_identity": "1. ஆத்ம காரகன் & வாழ்க்கை நோக்கம்",
+        "career_destiny": "2. தொழில் மற்றும் செல்வம் (அமத்தியகாரகன்)",
+        "spouse_dynamics": "3. வாழ்க்கைத் துணைவர் குணம் (தாரகாரகன்)",
+        "avastha_header": "4. கிரக அவஸ்தைகள்",
+        "ak_saturn": "**சனி ஆத்மகாரகன்:** பொறுமை, ஒழுக்கம் மற்றும் நீண்ட கால உழைப்பின் மூலம் நிலையான வெற்றி.",
+        "amk_sun": "**சூரியன் அமத்தியகாரகன்:** தலைமைப் பண்பு, நிர்வாகம் மற்றும் சுயதொழிலில் மேன்மை.",
+        "dk_mercury": "**புதன் தாரகாரகன்:** கூர்மையான அறிவாற்றல் மற்றும் சிறந்த உரையாடல் திறன் கொண்ட துணைவர்.",
+        "budhaditya": "**புதாதித்ய யோகம்:** சிறந்த அறிவாற்றல் மற்றும் நிர்வாகத் திறன்.",
+        "sunsat": "**சூரியன் + சனி சேர்க்கை:** அசைக்க முடியாத சகிப்புத்தன்மை மற்றும் மன உறுதி.",
+    },
+}
 
-# --- User Input Section ---
-with st.form("birth_details_form"):
-  st.subheader("1. Enter Birth Data")
-
-  dob = st.date_input(
-      "Date of Birth",
-      value=datetime.date(1995, 1, 1),
-      min_value=datetime.date(1900, 1, 1),
-      max_value=datetime.date.today(),
+# --- 2. Language Selection UI ---
+col_head, col_lang = st.columns([3, 1])
+with col_lang:
+  selected_lang = st.selectbox(
+      "🌐 Select Language / भाषा चुनें", list(LANG_PACK.keys()), index=0
   )
 
-  st.write("Time of Birth")
-  t_col1, t_col2, t_col3 = st.columns(3)
-  with t_col1:
-    t_hour = st.selectbox(
-        "Hour", [f"{i:02d}" for i in range(1, 13)], index=9
-    )  # Default 10
-  with t_col2:
-    t_min = st.selectbox(
-        "Minute", [f"{i:02d}" for i in range(0, 60)], index=40
-    )  # Default 40
-  with t_col3:
+T = LANG_PACK[selected_lang]
+
+with col_head:
+  st.title(T["title"])
+  st.caption(T["subtitle"])
+
+# --- 3. Input Form ---
+with st.form("birth_details_form"):
+  st.subheader(T["input_header"])
+
+  c_dob, c_tob1, c_tob2, c_tob3 = st.columns([2, 1, 1, 1])
+  with c_dob:
+    dob = st.date_input(
+        T["dob"],
+        value=datetime.date(1995, 1, 1),
+        min_value=datetime.date(1900, 1, 1),
+        max_value=datetime.date.today(),
+    )
+  with c_tob1:
+    t_hour = st.selectbox(T["hour"], [f"{i:02d}" for i in range(1, 13)], index=9)
+  with c_tob2:
+    t_min = st.selectbox(T["min"], [f"{i:02d}" for i in range(0, 60)], index=40)
+  with c_tob3:
     t_ampm = st.selectbox("AM / PM", ["AM", "PM"], index=0)
 
-  place = st.text_input("Birth City / Place", value="Sangamner, Maharashtra")
-
-  c_lat, c_lon = st.columns(2)
+  c_place, c_lat, c_lon = st.columns([2, 1, 1])
+  with c_place:
+    place = st.text_input(T["city"], value="Sangamner, Maharashtra")
   with c_lat:
-    lat = st.number_input("Latitude", value=19.5761, format="%.4f")
+    lat = st.number_input(T["lat"], value=19.5761, format="%.4f")
   with c_lon:
-    lon = st.number_input("Longitude", value=74.2070, format="%.4f")
+    lon = st.number_input(T["lon"], value=74.2070, format="%.4f")
 
-  submitted = st.form_submit_button("🔮 Generate Complete In-Depth Prediction")
+  submitted = st.form_submit_button(T["btn"])
 
-
-# --- Astrological Calculation Engines ---
+# --- 4. Astrological Calculation Helper Functions ---
 def calculate_jaimini_karakas(planets_data):
-  seven_planets = {
-      k: v for k, v in planets_data.items() if k not in ["Rahu", "Ketu"]
-  }
-  sorted_planets = sorted(
-      seven_planets.items(), key=lambda x: x[1]["deg"], reverse=True
-  )
-
-  karaka_titles = [
-      ("Atmakaraka (AK)", "आत्मा आणि जीवन हेतू (Soul & Core Identity)"),
-      ("Amatyakaraka (AmK)", "करिअर आणि कर्म (Career, Wealth & Intellect)"),
-      ("Bhratrukaraka (BK)", "पराक्रम आणि भावंडे (Courage, Siblings & Gurus)"),
-      ("Matrukaraka (MK)", "सुख आणि आई (Peace, Mother, Property)"),
-      ("Putrakaraka (PK)", "बुद्धिमत्ता आणि संतती (Creativity, Children)"),
-      ("Gnatikaraka (GK)", "रोग, शत्रू आणि संघर्ष (Obstacles, Competition)"),
-      ("Darakaraka (DK)", "जोडीदार आणि वैवाहिक जीवन (Spouse & Partnership)"),
+  seven = {k: v for k, v in planets_data.items() if k not in ["Rahu", "Ketu"]}
+  sorted_p = sorted(seven.items(), key=lambda x: x[1]["deg"], reverse=True)
+  roles = [
+      "Atmakaraka (AK)",
+      "Amatyakaraka (AmK)",
+      "Bhratrukaraka (BK)",
+      "Matrukaraka (MK)",
+      "Putrakaraka (PK)",
+      "Gnatikaraka (GK)",
+      "Darakaraka (DK)",
   ]
-
-  karaka_result = []
-  karaka_dict = {}
-  for idx, (p_name, p_info) in enumerate(sorted_planets):
-    k_name, desc = karaka_titles[idx]
-    karaka_dict[k_name.split()[0]] = (
-        p_name  # Store short key like Atmakaraka, Amatyakaraka
-    )
-    karaka_result.append({
-        "Karaka Role": k_name,
-        "Signification": desc,
+  res = []
+  k_dict = {}
+  for idx, (p_name, p_info) in enumerate(sorted_p):
+    k_dict[roles[idx].split()[0]] = p_name
+    res.append({
+        "Karaka Role": roles[idx],
         "Planet": p_name,
         "Degree": f"{p_info['deg']:.2f}°",
-        "Rashi (Sign)": p_info["sign"],
+        "Sign": p_info["sign"],
+        "House": p_info["house"],
     })
-  return pd.DataFrame(karaka_result), karaka_dict
+  return pd.DataFrame(res), k_dict
 
 
-def get_deep_predictions(karaka_dict, planets_data):
-  ak = karaka_dict.get("Atmakaraka", "Saturn")
-  amk = karaka_dict.get("Amatyakaraka", "Sun")
-  dk = karaka_dict.get("Darakaraka", "Mercury")
-
-  ak_interpretations = {
-      "Sun": (
-          "तुमचा आत्मकारक सूर्य आहे. जीवनात स्वाभिमान, नेतृत्व (Leadership) आणि"
-          " उच्च पद प्राप्त करणे हा तुमचा मुख्य मार्ग आहे. परंतु अहंकारावर ताबा"
-          " ठेवणे हे सर्वात मोठे आध्यात्मिक आव्हान असेल."
-      ),
-      "Moon": (
-          "तुमचा आत्मकारक चंद्र आहे. मन अत्यंत संवेदनशील आणि दयाळू आहे. इतरांची"
-          " काळजी घेणे, समुपदेशन किंवा समाजोपयोगी कामात तुम्हाला आंतरिक समाधान"
-          " लाभेल."
-      ),
-      "Mars": (
-          "तुमचा आत्मकारक मंगळ आहे. प्रचंड ऊर्जा, साहस आणि आव्हानांना सामोरे"
-          " जाण्याची वृत्ती राहील. राग आणि घाईगडबडीत घेतलेले निर्णय टाळणे हे तुमचे"
-          " मुख्य जीवन ध्येय आहे."
-      ),
-      "Mercury": (
-          "तुमचा आत्मकारक बुध आहे. बुद्धी, संभाषण कौशल्य, लेखन आणि विश्लेषण हे"
-          " तुमचे सामर्थ्य आहे. सत्य बोलणे आणि स्पष्ट विचार ठेवणे हा तुमच्या"
-          " आत्म्याचा मार्ग आहे."
-      ),
-      "Jupiter": (
-          "तुमचा आत्मकारक गुरू आहे. ज्ञान, अध्यात्म, शिक्षण आणि सल्लागार"
-          " (Consultancy) च्या माध्यमातून तुमची खरी ओळख बनेल. ज्ञानाचा योग्य वापर"
-          " समाजासाठी करणे आवश्यक आहे."
-      ),
-      "Venus": (
-          "तुमचा आत्मकारक शुक्र आहे. कला, सौंदर्य, सर्जनशीलता आणि नातेसंबंधांचे"
-          " महत्त्व तुमच्या आयुष्यात सर्वोच्च राहील. संयम आणि नैतिक मूल्यांचे पालन"
-          " तुम्हाला यश देईल."
-      ),
-      "Saturn": (
-          "तुमचा आत्मकारक शनी आहे. कठीण परिश्रम, शिस्त, संयम आणि सत्याची शिकवण हा"
-          " तुमचा मूळ पाया आहे. सुरुवातीला विलंब किंवा संघर्ष होऊ शकतो, पण दीर्घ"
-          " मुदतीमध्ये शाश्वत आणि मोठे यश मिळते."
-      ),
-  }
-
-  amk_interpretations = {
-      "Sun": (
-          "प्रशासकीय कामे, सरकारी संस्था, उच्च व्यवस्थापन किंवा स्वतःचा"
-          " स्वतंत्र अधिकार असणारे कार्यक्षेत्र तुमच्यासाठी सर्वाधिक फायदेशीर"
-          " ठरेल."
-      ),
-      "Moon": (
-          "पब्लिक डीलिंग, हॉस्पिटॅलिटी, समुपदेशन, कला किंवा मानवी संसाधनांशी"
-          " (HR) संबंधित क्षेत्रात उत्तम प्रगतीचे योग आहेत."
-      ),
-      "Mars": (
-          "इंजिनिअरिंग, तंत्रज्ञान, डिफेन्स, रिअल इस्टेट किंवा धोरणात्मक"
-          " नेतृत्वात यश मिळेल."
-      ),
-      "Mercury": (
-          "डेटा विश्लेषण, सॉफ्टवेअर, फायनान्स, ट्रेड, कन्सल्टन्सी, लेखन किंवा"
-          " मध्यस्थीच्या कामात उच्च आर्थिक यश मिळेल."
-      ),
-      "Jupiter": (
-          "अध्यापन, सल्लागार (Advisory/Consultancy), वित्त (Finance),"
-          " मार्गदर्शक किंवा रिसर्चच्या क्षेत्रात प्रचंड आदर व धनलाभ होईल."
-      ),
-      "Venus": (
-          "क्रिएटिव्ह इंडस्ट्री, डिझाइन, लक्झरी, माध्यम किंवा भागीदारीच्या"
-          " व्यवसायात करिअर बहरेल."
-      ),
-      "Saturn": (
-          "ऑपरेशन्स, रिसर्च, सिस्टीम आर्किटेक्चर, कायदेशीर क्षेत्र किंवा दीर्घकालीन"
-          " संस्थात्मक निर्मितीमध्ये मोठे अधिकार प्राप्त होतील."
-      ),
-  }
-
-  dk_interpretations = {
-      "Sun": (
-          "जोडीदार प्रतिष्ठित, स्वाभिमानी आणि अधिकार गाजवणारा असू शकतो."
-          " परस्पर सन्मान राखणे अत्यंत आवश्यक राहील."
-      ),
-      "Moon": (
-          "जोडीदार भावनिक, काळजीवाहू आणि कुटुंबाभिमुख असेल. नात्यात आपुलकी आणि"
-          " प्रेम राहील."
-      ),
-      "Mars": (
-          "जोडीदार अतिशय उत्साही, स्पष्टवक्ता आणि महत्त्वाकांक्षी असेल."
-          " नात्यामध्ये मोकळेपणा ठेवणे हिताचे ठरेल."
-      ),
-      "Mercury": (
-          "जोडीदार हुशार, संवादप्रिय, विनोदी आणि बुद्धिमान असेल. बौद्धिक देवाणघेवाण"
-          " नात्याचा पाया ठरेल."
-      ),
-      "Jupiter": (
-          "जोडीदार सुसंस्कृत, ज्ञानी, आध्यात्मिक आणि मार्गदर्शन करणारा असेल."
-          " वैवाहिक जीवन स्थिर राहील."
-      ),
-      "Venus": (
-          "जोडीदार देखणा, आकर्षक, कलाप्रेमी आणि नात्यात सौहार्द राखणारा असेल."
-      ),
-      "Saturn": (
-          "जोडीदार अत्यंत परिपक्व (Mature), कर्तव्यदक्ष, व्यावहारिक आणि शांत"
-          " स्वभावाचा असेल. नात्यात गांभीर्य राहील."
-      ),
-  }
-
-  return (
-      ak_interpretations.get(ak, ""),
-      amk_interpretations.get(amk, ""),
-      dk_interpretations.get(dk, ""),
-  )
+def compute_conjunctions(planets_data):
+  house_map = {}
+  for p, data in planets_data.items():
+    house_map.setdefault(data["house"], []).append(
+        (p, data["deg"], data["sign"])
+    )
+  conjunctions = []
+  for house, p_list in house_map.items():
+    if len(p_list) > 1:
+      names = [item[0] for item in p_list]
+      conjunctions.append({
+          "House": house,
+          "Sign": p_list[0][2],
+          "Planets Involved": ", ".join(names),
+      })
+  return conjunctions
 
 
-# --- Output Display ---
+def compute_parashari_aspects(planets_data):
+  aspect_hits = []
+  for p, d in planets_data.items():
+    h = d["house"]
+    targets = []
+    if p == "Mars":
+      targets = [(h + 3) % 12 or 12, (h + 6) % 12 or 12, (h + 7) % 12 or 12]
+    elif p == "Jupiter":
+      targets = [(h + 4) % 12 or 12, (h + 6) % 12 or 12, (h + 8) % 12 or 12]
+    elif p == "Saturn":
+      targets = [(h + 2) % 12 or 12, (h + 6) % 12 or 12, (h + 9) % 12 or 12]
+    elif p in ["Sun", "Moon", "Mercury", "Venus"]:
+      targets = [(h + 6) % 12 or 12]
+
+    for t in targets:
+      residents = [
+          pl for pl, info in planets_data.items() if info["house"] == t
+      ]
+      aspect_hits.append({
+          "Aspecting Planet": p,
+          "Target House": t,
+          "Aspect Received By": (
+              ", ".join(residents) if residents else "Open Space"
+          ),
+      })
+  return pd.DataFrame(aspect_hits)
+
+
+# --- 5. Execution Pipeline ---
 if submitted:
-  st.success("✅ सर्व गणितीय सूत्रे व नियम यशस्वीरीत्या विश्लेषित झाले आहेत!")
-
-  sample_planets = {
-      "Sun": {"deg": 17.32, "sign": "Sagittarius"},
-      "Moon": {"deg": 12.44, "sign": "Aquarius"},
-      "Mars": {"deg": 16.45, "sign": "Scorpio"},
-      "Mercury": {"deg": 1.88, "sign": "Sagittarius"},
-      "Jupiter": {"deg": 11.36, "sign": "Gemini"},
-      "Venus": {"deg": 12.48, "sign": "Capricorn"},
-      "Saturn": {"deg": 21.96, "sign": "Sagittarius"},
-      "Rahu": {"deg": 24.69, "sign": "Aquarius"},
-      "Ketu": {"deg": 24.69, "sign": "Leo"},
+  natal_planets = {
+      "Sun": {"deg": 17.32, "sign": "Sagittarius", "house": 9},
+      "Moon": {"deg": 12.44, "sign": "Aquarius", "house": 11},
+      "Mars": {"deg": 16.45, "sign": "Scorpio", "house": 8},
+      "Mercury": {"deg": 1.88, "sign": "Sagittarius", "house": 9},
+      "Jupiter": {"deg": 11.36, "sign": "Gemini", "house": 3},
+      "Venus": {"deg": 12.48, "sign": "Capricorn", "house": 10},
+      "Saturn": {"deg": 21.96, "sign": "Sagittarius", "house": 9},
+      "Rahu": {"deg": 24.69, "sign": "Aquarius", "house": 11},
+      "Ketu": {"deg": 24.69, "sign": "Leo", "house": 5},
   }
 
-  # Calculations
-  df_karakas, karaka_dict = calculate_jaimini_karakas(sample_planets)
-  ak_text, amk_text, dk_text = get_deep_predictions(
-      karaka_dict, sample_planets
-  )
+  df_karakas, k_dict = calculate_jaimini_karakas(natal_planets)
+  conjunctions = compute_conjunctions(natal_planets)
+  df_aspects = compute_parashari_aspects(natal_planets)
 
-  # Tabs for Clean UI
-  tab1, tab2, tab3 = st.tabs([
-      "📖 संपूर्ण भविष्यकथन (Detailed Predictions)",
-      "📊 ग्रह आणि कारके (Planetary Matrix)",
-      "🎯 इव्हेंट टाइमिंग (Double Transit Check)",
-  ])
+  tab1, tab2, tab3, tab4 = st.tabs(
+      [T["tab1"], T["tab2"], T["tab3"], T["tab4"]]
+  )
 
   with tab1:
-    st.markdown("### 🌟 १. आत्मा, स्वभाव आणि जीवनाचे ध्येय (Life Purpose)")
-    st.markdown(
-        f"**तुमचा मुख्य आत्मकारक (Atmakaraka): `{karaka_dict['Atmakaraka']}`**"
-    )
-    st.info(ak_text)
+    st.subheader(T["core_identity"])
+    st.info(T["ak_saturn"])
 
-    st.markdown("### 💼 २. करिअर, अधिकार आणि धनयोग (Career & Wealth Destiny)")
-    st.markdown(
-        "**तुमचा अमात्यकारक (Amatyakaraka / Action Planet):"
-        f" `{karaka_dict['Amatyakaraka']}`**"
-    )
-    st.success(amk_text)
+    st.subheader(T["career_destiny"])
+    st.success(T["amk_sun"])
 
-    st.markdown(
-        "### 💍 ३. वैवाहिक जीवन आणि जोडीदाराचा स्वभाव (Spouse & Partnership)"
-    )
-    st.markdown(
-        f"**तुमचा दाराकारक (Darakaraka): `{karaka_dict['Darakaraka']}`**"
-    )
-    st.write(dk_text)
+    st.subheader(T["spouse_dynamics"])
+    st.write(T["dk_mercury"])
 
-    st.markdown("### ⚠️ ४. विशेष कार्मिक अलर्ट (Karmic Degree / Vastha)")
-    for p, info in sample_planets.items():
+    st.subheader(T["avastha_header"])
+    for p, info in natal_planets.items():
       if info["deg"] <= 2.0:
         st.warning(
-            f"**{p} ({info['deg']:.2f}°)** हा ग्रह **बाल्यावस्थेत (Inception"
-            " Degree)** आहे. हा ग्रह आयुष्यात संपूर्णपणे नवीन कर्म व नवीन"
-            " अनुभवांची सुरुवात दर्शवतो."
+            f"⚠️ **{p} ({info['deg']:.2f}°) - Balyavastha (Inception State):**"
+            " Raw karmic cycle requiring deliberate cultivation."
         )
       elif info["deg"] >= 28.0:
         st.error(
-            f"**{p} ({info['deg']:.2f}°)** हा ग्रह **वृद्धावस्थेत (Karmic"
-            " Boundary)** आहे. हा ग्रह भूतकाळातील कर्म संपवून मुक्तीकडे घेऊन जाणारा"
-            " ठरेल."
+            f"⏳ **{p} ({info['deg']:.2f}°) - Vriddhavastha (Culminating"
+            " State):** Karmic completion cycle."
         )
 
   with tab2:
-    st.subheader("जैमिनी चर कारके तक्ता (Jaimini Chara Karakas)")
-    st.table(df_karakas)
+    st.subheader("Planetary Conjunctions (Yutis)")
+    for conj in conjunctions:
+      with st.expander(
+          f"House {conj['House']} ({conj['Sign']}): {conj['Planets Involved']}",
+          expanded=True,
+      ):
+        if "Sun" in conj["Planets Involved"] and (
+            "Mercury" in conj["Planets Involved"]
+        ):
+          st.write(T["budhaditya"])
+        if "Sun" in conj["Planets Involved"] and (
+            "Saturn" in conj["Planets Involved"]
+        ):
+          st.write(T["sunsat"])
+
+    st.subheader("Parashari Drishti Matrix (Special Aspects)")
+    st.dataframe(df_aspects, use_container_width=True)
 
   with tab3:
-    st.subheader("के. एन. राव डबल ट्रान्झिट पडताळणी (Double Transit Theory)")
-    st.write(
-        "कोणतीही मोठी घटना (उदा. विवाह किंवा पदोन्नती) होण्यासाठी **गुरू आणि"
-        " शनी** या दोघांची संबंधित घरावर दृष्टी असणे अनिवार्य आहे."
-    )
+    st.subheader("Jaimini Chara Karakas (Degree Hierarchy)")
+    st.dataframe(df_karakas, use_container_width=True)
 
-    colA, colB = st.columns(2)
-    with colA:
-      check_house = st.selectbox(
-          "पडताळणीसाठी घर निवडा (Select House):",
+  with tab4:
+    st.subheader("Vimshottari Dasha Horizon")
+    dasha_df = pd.DataFrame([
+        {
+            "Dasha Level": "Mahadasha",
+            "Planet": "Saturn",
+            "Period": "2008 - 2027",
+            "Focus": "Karmic structuring & foundational mastery",
+        },
+        {
+            "Dasha Level": "Antardasha (Upcoming)",
+            "Planet": "Moon",
+            "Period": "Starting Feb 2027",
+            "Focus": "Public transition & enterprise launch",
+        },
+        {
+            "Dasha Level": "Mahadasha (Upcoming)",
+            "Planet": "Mercury",
+            "Period": "2027 - 2044",
+            "Focus": (
+                "Intellectual commerce, software, authoring & major expansion"
+            ),
+        },
+    ])
+    st.table(dasha_df)
+
+    st.subheader("K.N. Rao Double Transit Verification")
+    col_v1, col_v2 = st.columns(2)
+    with col_v1:
+      val_house = st.selectbox(
+          "House to Validate:",
           [7, 10],
           format_func=lambda x: (
-              "७ वे घर (विवाह आणि भागीदारी)"
+              "House 7: Relationship / Partnership Expansion"
               if x == 7
-              else "१० वे घर (करिअर, पद आणि व्यवसाय)"
+              else "House 10: Career Milestone / Enterprise Launch"
           ),
       )
-
-    current_jup_aspects = [2, 6, 10]
-    current_sat_aspects = [3, 7, 10]
-
-    jup_hits = check_house in current_jup_aspects
-    sat_hits = check_house in current_sat_aspects
-    double_transit_active = jup_hits and sat_hits
-
-    with colB:
-      if double_transit_active:
-        st.success(
-            f"🎯 **Double Transit ACTIVE on House {check_house}!**\n\nसध्या गुरू"
-            " आणि शनी या दोन्ही ग्रहांचा या घरावर पूर्ण प्रभाव आहे. ही घटना"
-            " घडण्यासाठी हा सर्वोत्तम काळ (High-Confidence Timing Window) आहे."
+    with col_v2:
+      if val_house == 10:
+        st.info(
+            "⏳ **House 10 Status:** Saturn & Jupiter transit alignments are"
+            " maturing toward the 2027 trigger window."
         )
-      else:
-        st.warning(
-            f"⏳ **Double Transit Not Active on House {check_house}.**\n\nया"
-            " कालावधीत ही मोठी घटना घडण्यासाठी अनुकूल ग्रहांचे संकेत सध्या"
-            " अपूर्ण आहेत."
+      elif val_house == 7:
+        st.success(
+            "🎯 **House 7 Status:** Jupiter transit aspect active. Fosters"
+            " strategic partnerships and collaborative enterprise."
         )
