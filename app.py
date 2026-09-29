@@ -1,117 +1,132 @@
-import streamlit as st
-import pandas as pd
 import datetime
+import pandas as pd
+import streamlit as st
 import swisseph as swe
 
-st.set_page_config(page_title="Evidence-Based Vedic Astro Engine", layout="wide")
+st.set_page_config(
+    page_title="K.N. Rao Evidence-Based Astro Engine", layout="wide"
+)
 
-# --- 1. Multi-Language Dictionary Engine ---
-LANG_PACK = {
-    "English": {
-        "title": "⚡ Live Precision Vedic Astro Engine",
-        "subtitle": "Ephemeris: Swiss Ephemeris (Lahiri Ayanamsha) | Frameworks: BPHS | Jaimini (K.N. Rao) | KP",
-        "input_header": "1. Enter Real Birth Data & Coordinates",
-        "dob": "Date of Birth",
-        "tob": "Time of Birth",
-        "hour": "Hour",
-        "min": "Minute",
-        "city": "Birth City / Place",
-        "lat": "Latitude",
-        "lon": "Longitude",
-        "btn": "🔮 Compute Live Ephemeris & Karmic Matrix",
-        "tab1": "🔍 Comprehensive Predictions",
-        "tab2": "🪐 Conjunctions & Parashari Aspects (PAC)",
-        "tab3": "📊 Live Planetary Positions & Jaimini Karakas",
-        "tab4": "⏱️ Vimshottari & Double Transit",
-        "core_identity": "1. Core Soul Identity & Karmic Path (Atmakaraka)",
-        "career_destiny": "2. Professional Mastery & Wealth (Amatyakaraka)",
-        "spouse_dynamics": "3. Partnership & Spousal Blueprint (Darakaraka)",
-        "avastha_header": "4. Critical BPHS Planetary States (Avasthas)",
-    },
-    "मराठी": {
-        "title": "⚡ थेट ग्रहस्थिती वैदिक ज्योतिष प्रेडिक्शन इंजिन",
-        "subtitle": "खगोलशास्त्र: स्विस एफिमरिस (लाहिरी अयनांश) | पद्धती: पराशरी (BPHS) | जैमिनी (के.एन. राव)",
-        "input_header": "१. खरी जन्मतारीख, वेळ आणि ठिकाण प्रविष्ट करा",
-        "dob": "जन्मतारीख",
-        "tob": "जन्म वेळ",
-        "hour": "तास",
-        "min": "मिनिट",
-        "city": "जन्म शहर / ठिकाण",
-        "lat": "अक्षांश (Latitude)",
-        "lon": "रेखांश (Longitude)",
-        "btn": "🔮 प्रत्यक्ष ग्रहस्थिती आणि सखोल भविष्यकथन तयार करा",
-        "tab1": "🔍 सखोल भविष्यकथन",
-        "tab2": "🪐 युती आणि पराशरी दृष्टी (PAC विश्लेषण)",
-        "tab3": "📊 प्रत्यक्ष ग्रहस्थिती आणि जैमिनी चर कारके",
-        "tab4": "⏱️ विंशोत्तरी दशा आणि गोचर",
-        "core_identity": "१. मूळ आत्मा, स्वभाव आणि जीवन ध्येय (आत्मकारक)",
-        "career_destiny": "२. करिअर, अधिकार आणि धनप्राप्ती (अमात्यकारक)",
-        "spouse_dynamics": "३. जोडीदाराचा स्वभाव आणि वैवाहिक जीवन (दाराकारक)",
-        "avastha_header": "४. महत्त्वाच्या पराशरी ग्रहावस्था (BPHS Avasthas)",
-    },
-    "हिंदी": {
-        "title": "⚡ प्रत्यक्ष ग्रहस्थिति वैदिक ज्योतिष प्रेडिक्शन इंजन",
-        "subtitle": "खगोलशास्त्र: स्विस एफिमरिस (लाहिड़ी अयनांश) | सिद्धांत: पाराशरी (BPHS) | जैमिनी",
-        "input_header": "१. वास्तविक जन्म विवरण और अक्षांश/देशांतर",
-        "dob": "जन्म तिथि",
-        "tob": "जन्म समय",
-        "hour": "घंटा",
-        "min": "मिनट",
-        "city": "जन्म स्थान / शहर",
-        "lat": "अक्षांश (Latitude)",
-        "lon": "देशांतर (Longitude)",
-        "btn": "🔮 प्रत्यक्ष ग्रह स्थिति और विस्तृत फलित उत्पन्न करें",
-        "tab1": "🔍 विस्तृत भविष्यफल",
-        "tab2": "🪐 युति और पाराशरी दृष्टि (PAC)",
-        "tab3": "📊 प्रत्यक्ष ग्रह अंश और जैमिनी चर कारक",
-        "tab4": "⏱️ विंशोत्तरी दशा और गोचर",
-        "core_identity": "१. आत्मिक उद्देश्य और जीवन पथ (आत्मकारक)",
-        "career_destiny": "२. आजीविका, पद और धन संपदा (अमात्यकारक)",
-        "spouse_dynamics": "३. जीवनसाथी का स्वभाव और वैवाहिक योग (दाराकारक)",
-        "avastha_header": "४. पाराशर ग्रहावस्था विश्लेषण (BPHS Avasthas)",
-    }
-}
-
-# --- 2. Language Selection UI ---
+# --- Header Section ---
 col_head, col_lang = st.columns([3, 1])
 with col_lang:
-    selected_lang = st.selectbox("🌐 Language / भाषा", list(LANG_PACK.keys()), index=0)
-
-T = LANG_PACK[selected_lang]
+  lang = st.selectbox("🌐 Language / भाषा", ["English", "मराठी"], index=0)
 
 with col_head:
-    st.title(T["title"])
-    st.caption(T["subtitle"])
+  if lang == "मराठी":
+    st.title("⚡ के. एन. राव प्रेडिक्शन व ॲस्ट्रॉलॉजिकल इंजिन")
+    st.caption(
+        "अचूक गणित: स्विस एफिमरिस | पद्धती: पराशरी BPHS, के.एन. राव डबल ट्रान्झिट"
+        " आणि जैमिनी चर कारके"
+    )
+  else:
+    st.title("⚡ K.N. Rao Evidence-Based Astrological Engine")
+    st.caption(
+        "Ephemeris: Swiss Ephemeris (Lahiri) | Frameworks: BPHS, K.N. Rao Double"
+        " Transit & Jaimini Karakas"
+    )
 
-# --- 3. Input Form ---
+# --- 1. User Input Form ---
 with st.form("birth_details_form"):
-    st.subheader(T["input_header"])
-    
-    c_dob, c_tob1, c_tob2, c_tob3 = st.columns([2, 1, 1, 1])
-    with c_dob:
-        dob = st.date_input(T["dob"], value=datetime.date(1995, 1, 1), min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
-    with c_tob1:
-        t_hour = st.selectbox(T["hour"], [f"{i:02d}" for i in range(1, 13)], index=9)
-    with c_tob2:
-        t_min = st.selectbox(T["min"], [f"{i:02d}" for i in range(0, 60)], index=40)
-    with c_tob3:
-        t_ampm = st.selectbox("AM / PM", ["AM", "PM"], index=0)
+  st.subheader(
+      "१. जन्म तपशील प्रविष्ट करा"
+      if lang == "मराठी"
+      else "1. Enter Real Birth Details"
+  )
 
-    c_place, c_lat, c_lon = st.columns([2, 1, 1])
-    with c_place:
-        place = st.text_input(T["city"], value="Sangamner, Maharashtra")
-    with c_lat:
-        lat = st.number_input(T["lat"], value=19.5761, format="%.4f")
-    with c_lon:
-        lon = st.number_input(T["lon"], value=74.2070, format="%.4f")
-        
-    submitted = st.form_submit_button(T["btn"])
+  c_dob, c_tob1, c_tob2, c_tob3 = st.columns([2, 1, 1, 1])
+  with c_dob:
+    dob = st.date_input(
+        "Date of Birth" if lang == "English" else "जन्मतारीख",
+        value=datetime.date(1995, 1, 1),
+        min_value=datetime.date(1900, 1, 1),
+        max_value=datetime.date.today(),
+    )
+  with c_tob1:
+    t_hour = st.selectbox(
+        "Hour" if lang == "English" else "तास",
+        [f"{i:02d}" for i in range(1, 13)],
+        index=9,
+    )
+  with c_tob2:
+    t_min = st.selectbox(
+        "Minute" if lang == "English" else "मिनिट",
+        [f"{i:02d}" for i in range(0, 60)],
+        index=40,
+    )
+  with c_tob3:
+    t_ampm = st.selectbox("AM / PM", ["AM", "PM"], index=0)
 
-# --- 4. Astronomical Constants ---
+  c_place, c_lat, c_lon = st.columns([2, 1, 1])
+  with c_place:
+    place = st.text_input(
+        "Birth City" if lang == "English" else "जन्म ठिकाण / शहर",
+        value="Sangamner, Maharashtra",
+    )
+  with c_lat:
+    lat = st.number_input(
+        "Latitude" if lang == "English" else "अक्षांश",
+        value=19.5761,
+        format="%.4f",
+    )
+  with c_lon:
+    lon = st.number_input(
+        "Longitude" if lang == "English" else "रेखांश",
+        value=74.2070,
+        format="%.4f",
+    )
+
+  btn_label = (
+      "🔮 संपूर्ण भविष्यकथन व योग विश्लेषण तयार करा"
+      if lang == "मराठी"
+      else "🔮 Generate Complete Prediction & Event Matrix"
+  )
+  submitted = st.form_submit_button(btn_label)
+
+# --- 2. Astronomical Constants & Nakshatras ---
 ZODIAC_SIGNS = [
-    "Aries", "Taurus", "Gemini", "Cancer", 
-    "Leo", "Virgo", "Libra", "Scorpio", 
-    "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+    "Aries",
+    "Taurus",
+    "Gemini",
+    "Cancer",
+    "Leo",
+    "Virgo",
+    "Libra",
+    "Scorpio",
+    "Sagittarius",
+    "Capricorn",
+    "Aquarius",
+    "Pisces",
+]
+
+NAKSHATRAS = [
+    ("Ashwini", "Ketu", 7),
+    ("Bharani", "Venus", 20),
+    ("Krittika", "Sun", 6),
+    ("Rohini", "Moon", 10),
+    ("Mrigashira", "Mars", 7),
+    ("Ardra", "Rahu", 18),
+    ("Punarvasu", "Jupiter", 16),
+    ("Pushya", "Saturn", 19),
+    ("Ashlesha", "Mercury", 17),
+    ("Magha", "Ketu", 7),
+    ("Purva Phalguni", "Venus", 20),
+    ("Uttara Phalguni", "Sun", 6),
+    ("Hasta", "Moon", 10),
+    ("Chitra", "Mars", 7),
+    ("Swati", "Rahu", 18),
+    ("Vishakha", "Jupiter", 16),
+    ("Anuradha", "Saturn", 19),
+    ("Jyeshtha", "Mercury", 17),
+    ("Mula", "Ketu", 7),
+    ("Purva Ashadha", "Venus", 20),
+    ("Uttara Ashadha", "Sun", 6),
+    ("Shravana", "Moon", 10),
+    ("Dhanishta", "Mars", 7),
+    ("Shatabhisha", "Rahu", 18),
+    ("Purva Bhadrapada", "Jupiter", 16),
+    ("Uttara Bhadrapada", "Saturn", 19),
+    ("Revati", "Mercury", 17),
 ]
 
 PLANET_MAP = {
@@ -122,209 +137,391 @@ PLANET_MAP = {
     swe.JUPITER: "Jupiter",
     swe.VENUS: "Venus",
     swe.SATURN: "Saturn",
-    swe.TRUE_NODE: "Rahu"
+    swe.TRUE_NODE: "Rahu",
 }
 
-# --- 5. Real Ephemeris Calculation Engine ---
+
+# --- 3. Astronomical Precision Engine ---
 def compute_live_ephemeris(dob, hour, minute, ampm, lat, lon):
-    # Convert 12-hour AM/PM to 24-hour decimal
-    h = int(hour)
-    if ampm == "PM" and h != 12:
-        h += 12
-    elif ampm == "AM" and h == 12:
-        h = 0
-    time_decimal_ist = h + (int(minute) / 60.0)
-    
-    # IST to UTC conversion (IST = UTC + 5:30)
-    time_decimal_utc = time_decimal_ist - 5.5
-    cal_date = dob
-    if time_decimal_utc < 0:
-        time_decimal_utc += 24.0
-        cal_date = dob - datetime.timedelta(days=1)
-    elif time_decimal_utc >= 24.0:
-        time_decimal_utc -= 24.0
-        cal_date = dob + datetime.timedelta(days=1)
-        
-    # Calculate Julian Day in UT
-    jd = swe.julday(cal_date.year, cal_date.month, cal_date.day, time_decimal_utc)
-    
-    # Set Sidereal Lahiri Ayanamsha
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
-    flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
-    
-    # Calculate Ascendant (Lagna)
-    houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
-    asc_deg = ascmc[0]
-    asc_sign_idx = int(asc_deg // 30)
-    asc_rem_deg = asc_deg % 30
-    asc_house_start = asc_sign_idx
-    
-    planets_data = {}
-    for p_id, p_name in PLANET_MAP.items():
-        res, _ = swe.calc_ut(jd, p_id, flags)
-        lon_deg = res[0]
-        sign_idx = int(lon_deg // 30)
-        rem_deg = lon_deg % 30
-        
-        # Calculate Vedic Whole Sign House relative to Lagna
-        house_num = ((sign_idx - asc_house_start) % 12) + 1
-        planets_data[p_name] = {
-            "deg": rem_deg,
-            "sign": ZODIAC_SIGNS[sign_idx],
-            "house": house_num,
-            "full_deg": lon_deg
-        }
-        
-    # Ketu is exactly 180 degrees opposite to Rahu
-    rahu_deg = planets_data["Rahu"]["full_deg"]
-    ketu_deg = (rahu_deg + 180.0) % 360.0
-    k_sign_idx = int(ketu_deg // 30)
-    k_rem_deg = ketu_deg % 30
-    k_house_num = ((k_sign_idx - asc_house_start) % 12) + 1
-    planets_data["Ketu"] = {
-        "deg": k_rem_deg,
-        "sign": ZODIAC_SIGNS[k_sign_idx],
-        "house": k_house_num,
-        "full_deg": ketu_deg
+  h = int(hour)
+  if ampm == "PM" and h != 12:
+    h += 12
+  elif ampm == "AM" and h == 12:
+    h = 0
+  time_decimal_ist = h + (int(minute) / 60.0)
+  time_decimal_utc = time_decimal_ist - 5.5
+  cal_date = dob
+  if time_decimal_utc < 0:
+    time_decimal_utc += 24.0
+    cal_date = dob - datetime.timedelta(days=1)
+  elif time_decimal_utc >= 24.0:
+    time_decimal_utc -= 24.0
+    cal_date = dob + datetime.timedelta(days=1)
+
+  jd = swe.julday(cal_date.year, cal_date.month, cal_date.day, time_decimal_utc)
+  swe.set_sid_mode(swe.SIDM_LAHIRI)
+  flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
+
+  houses, ascmc = swe.houses_ex(jd, lat, lon, b"P", flags)
+  asc_deg = ascmc[0]
+  asc_sign_idx = int(asc_deg // 30)
+  asc_rem_deg = asc_deg % 30
+
+  planets_data = {}
+  for p_id, p_name in PLANET_MAP.items():
+    res, _ = swe.calc_ut(jd, p_id, flags)
+    lon_deg = res[0]
+    sign_idx = int(lon_deg // 30)
+    rem_deg = lon_deg % 30
+    house_num = ((sign_idx - asc_sign_idx) % 12) + 1
+    planets_data[p_name] = {
+        "deg": rem_deg,
+        "sign": ZODIAC_SIGNS[sign_idx],
+        "house": house_num,
+        "full_deg": lon_deg,
     }
-    
-    lagna_info = {
-        "sign": ZODIAC_SIGNS[asc_sign_idx],
-        "deg": asc_rem_deg
-    }
-    
-    return planets_data, lagna_info
 
-def calculate_jaimini_karakas(planets_data):
-    seven = {k: v for k, v in planets_data.items() if k not in ["Rahu", "Ketu"]}
-    sorted_p = sorted(seven.items(), key=lambda x: x[1]['deg'], reverse=True)
-    roles = [
-        "Atmakaraka (AK)", "Amatyakaraka (AmK)", "Bhratrukaraka (BK)",
-        "Matrukaraka (MK)", "Putrakaraka (PK)", "Gnatikaraka (GK)", "Darakaraka (DK)"
-    ]
-    res = []
-    k_dict = {}
-    for idx, (p_name, p_info) in enumerate(sorted_p):
-        k_dict[roles[idx].split()[0]] = p_name
-        res.append({
-            "Karaka Role": roles[idx],
-            "Planet": p_name,
-            "Degree": f"{p_info['deg']:.2f}°",
-            "Sign": p_info['sign'],
-            "House": f"House {p_info['house']}"
-        })
-    return pd.DataFrame(res), k_dict
+  # Ketu (Exact 180 degrees opposite Rahu)
+  rahu_deg = planets_data["Rahu"]["full_deg"]
+  ketu_deg = (rahu_deg + 180.0) % 360.0
+  k_sign_idx = int(ketu_deg // 30)
+  planets_data["Ketu"] = {
+      "deg": ketu_deg % 30,
+      "sign": ZODIAC_SIGNS[k_sign_idx],
+      "house": ((k_sign_idx - asc_sign_idx) % 12) + 1,
+      "full_deg": ketu_deg,
+  }
 
-def compute_conjunctions(planets_data):
-    house_map = {}
-    for p, data in planets_data.items():
-        house_map.setdefault(data['house'], []).append((p, data['deg'], data['sign']))
-    conjunctions = []
-    for house, p_list in house_map.items():
-        if len(p_list) > 1:
-            names = [item[0] for item in p_list]
-            conjunctions.append({
-                "House": house,
-                "Sign": p_list[0][2],
-                "Planets Involved": ", ".join(names)
-            })
-    return conjunctions
+  return planets_data, {"sign": ZODIAC_SIGNS[asc_sign_idx], "deg": asc_rem_deg}
 
-def compute_parashari_aspects(planets_data):
-    aspect_hits = []
-    for p, d in planets_data.items():
-        h = d['house']
-        targets = []
-        if p == "Mars":
-            targets = [(h + 3) % 12 or 12, (h + 6) % 12 or 12, (h + 7) % 12 or 12]
-        elif p == "Jupiter":
-            targets = [(h + 4) % 12 or 12, (h + 6) % 12 or 12, (h + 8) % 12 or 12]
-        elif p == "Saturn":
-            targets = [(h + 2) % 12 or 12, (h + 6) % 12 or 12, (h + 9) % 12 or 12]
-        elif p in ["Sun", "Moon", "Mercury", "Venus"]:
-            targets = [(h + 6) % 12 or 12]
-            
-        for t in targets:
-            residents = [pl for pl, info in planets_data.items() if info['house'] == t]
-            aspect_hits.append({
-                "Aspecting Planet": p,
-                "Target House": f"House {t}",
-                "Aspect Received By": ", ".join(residents) if residents else "Open Space"
-            })
-    return pd.DataFrame(aspect_hits)
+
+# --- 4. Classical Yoga Scanner ---
+def detect_classical_yogas(planets, lagna_sign):
+  yogas = []
+  h_sun = planets["Sun"]["house"]
+  h_mer = planets["Mercury"]["house"]
+  h_jup = planets["Jupiter"]["house"]
+  h_moon = planets["Moon"]["house"]
+  h_sat = planets["Saturn"]["house"]
+  h_mars = planets["Mars"]["house"]
+  h_ven = planets["Venus"]["house"]
+
+  # Budhaditya Yoga
+  if h_sun == h_mer:
+    yogas.append({
+        "Yoga": "Budhaditya Yoga (बुधादित्य योग)",
+        "Type": "Raj Yoga / Intellectual Yoga",
+        "Description": (
+            "Sun and Mercury unite in the same house. Endows high analytical"
+            " mastery, razor-sharp intellect, reputation, and strong aptitude"
+            " for advisory or leadership."
+        ),
+    })
+
+  # Gaja Kesari Yoga (Jupiter in Kendra from Moon)
+  diff_jup_moon = (h_jup - h_moon) % 12
+  if diff_jup_moon in [0, 3, 6, 9]:
+    yogas.append({
+        "Yoga": "Gaja Kesari Yoga (गजकेसरी योग)",
+        "Type": "Sovereign Auspicious Yoga",
+        "Description": (
+            "Jupiter resides in a Kendra (1st, 4th, 7th, 10th) from the Moon."
+            " Grants lasting social respect, protection from adversaries,"
+            " noble character, and financial stability."
+        ),
+    })
+
+  # Pancha Mahapurusha Yogas (Exaltation or Own Sign in Kendra 1,4,7,10)
+  kendras = [1, 4, 7, 10]
+  if h_sat in kendras and planets["Saturn"]["sign"] in [
+      "Capricorn",
+      "Aquarius",
+      "Libra",
+  ]:
+    yogas.append({
+        "Yoga": "Shasha Mahapurusha Yoga (शश योग)",
+        "Type": "Pancha Mahapurusha (Saturn)",
+        "Description": (
+            "Saturn occupies Kendra in own or exalted sign. Indicates a"
+            " strategist, high endurance, power over large organizations, and"
+            " lasting authority achieved through discipline."
+        ),
+    })
+
+  if h_jup in kendras and planets["Jupiter"]["sign"] in [
+      "Sagittarius",
+      "Pisces",
+      "Cancer",
+  ]:
+    yogas.append({
+        "Yoga": "Hamsa Mahapurusha Yoga (हंस योग)",
+        "Type": "Pancha Mahapurusha (Jupiter)",
+        "Description": (
+            "Jupiter occupies Kendra in own or exalted sign. Indicates wisdom,"
+            " ethical leadership, spiritual stature, and widespread acclaim."
+        ),
+    })
+
+  if h_mars in kendras and planets["Mars"]["sign"] in [
+      "Aries",
+      "Scorpio",
+      "Capricorn",
+  ]:
+    yogas.append({
+        "Yoga": "Ruchaka Mahapurusha Yoga (रुचक योग)",
+        "Type": "Pancha Mahapurusha (Mars)",
+        "Description": (
+            "Mars in Kendra in own/exalted sign. Endows valor, executive"
+            " power, victory in litigation/competitions, and real-estate"
+            " strength."
+        ),
+    })
+
+  # Viparita Raja Yoga (Lords of 6, 8, 12 in 6, 8, 12)
+  dusthanas = [6, 8, 12]
+  if h_mars in dusthanas and h_sat in dusthanas:
+    yogas.append({
+        "Yoga": "Viparita Raja Yoga (विपरीत राजयोग)",
+        "Type": "Crisis-to-Triumph Yoga",
+        "Description": (
+            "Strong protection in periods of severe adversity. Success rises"
+            " rapidly after competitors stumble or through sudden unexpected"
+            " breakthroughs."
+        ),
+    })
+
+  return yogas
+
+
+# --- 5. Dynamic Vimshottari Dasha Engine ---
+def calculate_vimshottari(moon_full_deg, birth_date):
+  nak_idx = int(moon_full_deg // (360 / 27))
+  rem_nak_deg = moon_full_deg % (360 / 27)
+  nak_span = 360 / 27  # 13°20' = 13.3333°
+
+  nak_name, balance_lord, total_years = NAKSHATRAS[nak_idx]
+  fraction_left = 1.0 - (rem_nak_deg / nak_span)
+  balance_days = fraction_left * total_years * 365.25
+
+  # Order of 9 Mahadashas
+  dasha_order = [
+      ("Ketu", 7),
+      ("Venus", 20),
+      ("Sun", 6),
+      ("Moon", 10),
+      ("Mars", 7),
+      ("Rahu", 18),
+      ("Jupiter", 16),
+      ("Saturn", 19),
+      ("Mercury", 17),
+  ]
+
+  # Find start index
+  start_idx = 0
+  for i, (lord, span) in enumerate(dasha_order):
+    if lord == balance_lord:
+      start_idx = i
+      break
+
+  current_date = datetime.datetime(
+      birth_date.year, birth_date.month, birth_date.day
+  )
+  timeline = []
+
+  # First balance dasha
+  first_end = current_date + datetime.timedelta(days=balance_days)
+  timeline.append({
+      "Lord": balance_lord,
+      "Start Year": current_date.year,
+      "End Year": first_end.year,
+      "Span": f"{current_date.strftime('%b %Y')} - {first_end.strftime('%b %Y')}",
+  })
+  current_date = first_end
+
+  # Subsequent dashas
+  for step in range(1, 9):
+    idx = (start_idx + step) % 9
+    lord, yrs = dasha_order[idx]
+    end_date = current_date + datetime.timedelta(days=yrs * 365.25)
+    timeline.append({
+        "Lord": lord,
+        "Start Year": current_date.year,
+        "End Year": end_date.year,
+        "Span": (
+            f"{current_date.strftime('%b %Y')} - {end_date.strftime('%b %Y')}"
+        ),
+    })
+    current_date = end_date
+
+  return timeline, nak_name
+
 
 # --- 6. Execution Pipeline ---
 if submitted:
-    natal_planets, lagna_info = compute_live_ephemeris(dob, t_hour, t_min, t_ampm, lat, lon)
-    df_karakas, k_dict = calculate_jaimini_karakas(natal_planets)
-    conjunctions = compute_conjunctions(natal_planets)
-    df_aspects = compute_parashari_aspects(natal_planets)
-    
-    st.success(f"✅ Calculation Complete! Ascendant (Lagna): **{lagna_info['sign']} ({lagna_info['deg']:.2f}°) **")
-    
-    tab1, tab2, tab3, tab4 = st.tabs([T["tab1"], T["tab2"], T["tab3"], T["tab4"]])
-    
-    with tab1:
-        st.subheader(f"{T['core_identity']}: **{k_dict.get('Atmakaraka')}**")
-        ak_p = k_dict.get('Atmakaraka')
-        if ak_p == "Saturn":
-            st.info("Saturn as AK: The soul evolves through endurance, patient mastery, discipline, and eliminating ego. Yields permanent authority in later cycles.")
-        elif ak_p == "Sun":
-            st.info("Sun as AK: Soul path centers on executive authority, moral sovereignty, and leadership. Balancing ego and humility is the ultimate lesson.")
-        elif ak_p == "Mercury":
-            st.info("Mercury as AK: Mind, intellectual curiosity, speech, commerce, and analytical mastery form the soul's primary journey.")
-        elif ak_p == "Jupiter":
-            st.info("Jupiter as AK: Wisdom, counseling, advisory roles, and higher philosophy represent the soul's guiding light.")
-        elif ak_p == "Mars":
-            st.info("Mars as AK: Courage, decisive action, and protecting others. Channeling raw passion without impulsive anger is the key test.")
-        elif ak_p == "Venus":
-            st.info("Venus as AK: Aesthetics, refined relationships, artistic vision, and unconditional love.")
-        elif ak_p == "Moon":
-            st.info("Moon as AK: Emotional empathy, public connection, counseling, and deep psychological perception.")
-            
-        st.subheader(f"{T['career_destiny']}: **{k_dict.get('Amatyakaraka')}**")
-        amk_p = k_dict.get('Amatyakaraka')
-        st.success(f"**{amk_p} as Amatyakaraka:** Directs career orientation. Positioned in House {natal_planets[amk_p]['house']} ({natal_planets[amk_p]['sign']}). Indicates maximum success when applying {amk_p}'s core significations.")
-        
-        st.subheader(f"{T['spouse_dynamics']}: **{k_dict.get('Darakaraka')}**")
-        dk_p = k_dict.get('Darakaraka')
-        st.write(f"**{dk_p} as Darakaraka:** Positioned in House {natal_planets[dk_p]['house']} ({natal_planets[dk_p]['sign']}). Your spouse reflects the intellectual and behavioral traits of {dk_p}.")
-        
-        st.subheader(T["avastha_header"])
-        for p, info in natal_planets.items():
-            if info['deg'] <= 2.0:
-                st.warning(f"⚠️ **{p} ({info['deg']:.2f}°) in House {info['house']} - Balyavastha (Inception State):** Raw karmic cycle requiring conscious calibration.")
-            elif info['deg'] >= 28.0:
-                st.error(f"⏳ **{p} ({info['deg']:.2f}°) in House {info['house']} - Vriddhavastha (Culminating State):** Karmic completion cycle.")
-                
-    with tab2:
-        st.subheader("Planetary Conjunctions (Yutis)")
-        if conjunctions:
-            for conj in conjunctions:
-                with st.expander(f"House {conj['House']} ({conj['Sign']}): {conj['Planets Involved']}", expanded=True):
-                    st.write(f"Planets combined in close spatial union: **{conj['Planets Involved']}**.")
-        else:
-            st.write("No major planetary conjunctions in the same sign.")
-            
-        st.subheader("Parashari Full Aspect Table (Drishti Matrix)")
-        st.dataframe(df_aspects, use_container_width=True)
-        
-    with tab3:
-        st.subheader("Live Real-Time Planetary Positions")
-        live_list = []
-        for p, info in natal_planets.items():
-            live_list.append({
-                "Planet": p,
-                "Sign": info["sign"],
-                "Degree in Sign": f"{info['deg']:.2f}°",
-                "House Placement": f"House {info['house']}"
-            })
-        st.dataframe(pd.DataFrame(live_list), use_container_width=True)
-        
-        st.subheader("Jaimini Chara Karakas (Degree Hierarchy)")
-        st.dataframe(df_karakas, use_container_width=True)
-        
-    with tab4:
-        st.subheader("K.N. Rao Transit Verification")
-        val_h = st.selectbox("House to Validate:", [7, 10], format_func=lambda x: "House 7: Marriage / Partnership Expansion" if x==7 else "House 10: Career Milestone / Enterprise Launch")
-        st.info("Transit tracking active against natal Lagna coordinates.")
+  planets, lagna = compute_live_ephemeris(
+      dob, t_hour, t_min, t_ampm, lat, lon
+  )
+  yogas_found = detect_classical_yogas(planets, lagna["sign"])
+  dasha_timeline, birth_nak = calculate_vimshottari(
+      planets["Moon"]["full_deg"], dob
+  )
+
+  # Calculate Jaimini Karakas
+  seven = {k: v for k, v in planets.items() if k not in ["Rahu", "Ketu"]}
+  sorted_p = sorted(seven.items(), key=lambda x: x[1]["deg"], reverse=True)
+  ak_planet = sorted_p[0][0]  # Atmakaraka
+  amk_planet = sorted_p[1][0]  # Amatyakaraka
+  dk_planet = sorted_p[6][0]  # Darakaraka
+
+  st.success(
+      f"✅ **Lagna (Ascendant): {lagna['sign']} ({lagna['deg']:.2f}°) | Janma"
+      f" Nakshatra: {birth_nak}**"
+  )
+
+  # Tabs Architecture for High Value Reading
+  tab_pred, tab_events, tab_yogas, tab_dasha, tab_matrix = st.tabs([
+      "📖 संपूर्ण भविष्यकथन (Master Prediction)",
+      "🎯 प्रमुख जीवन घटना (Timing of Milestones)",
+      "🌟 कुंडलीतील राजयोग (Classical Yogas)",
+      "⏱️ विंशोत्तरी दशा टाईमलाईन (Vimshottari)",
+      "📊 खगोलीय तक्ता (Ephemeris Coordinates)",
+  ])
+
+  # --- TAB 1: MASTER PREDICTIONS (K.N. Rao Style) ---
+  with tab_pred:
+    st.header("Executive Vedic Assessment (के. एन. राव प्रारब्ध विश्लेषण)")
+
+    st.subheader(f"१. आत्म्याचा उद्देश व व्यक्तिमत्त्व (Atmakaraka: {ak_planet})")
+    if ak_planet == "Saturn":
+      st.markdown(
+          "> **शनी आत्मकारक:** तुमचा आत्मा कठोर शिस्त, सत्य, आणि निष्कलंक कर्माचा"
+          " मार्ग निवडतो. सुरुवातीच्या काळात विलंब, जबाबदाऱ्यांचे ओझे किंवा संघर्ष"
+          " जाणवू शकतो; परंतु हा ग्रह तुम्हाला एका रात्रीत नाही, तर कायमस्वरूपी"
+          " आणि अढळ सत्ता/अधिकार देतो. ३२ ते ३६ वयानंतर मोठा अधिकार प्राप्त"
+          " होतो."
+      )
+    elif ak_planet == "Sun":
+      st.markdown(
+          "> **सूर्य आत्मकारक:** नेतृत्व, स्वाभिमान, प्रशासकीय अधिकार आणि स्वतःचे"
+          " साम्राज्य निर्माण करणे हा तुमच्या आत्म्याचा मूळ हेतू आहे. कोणाच्या"
+          " हाताखाली दबून काम करणे तुम्हाला मान्य होणार नाही."
+      )
+    elif ak_planet == "Mercury":
+      st.markdown(
+          "> **बुध आत्मकारक:** बुद्धिमत्ता, डेटा, विश्लेषण, सल्लागार, तंत्रज्ञान"
+          " आणि वाणिज्य हा तुमचा खरा मार्ग आहे. सतत नवीन शिकणे ही तुमची ताकद"
+          " आहे."
+      )
+    elif ak_planet == "Jupiter":
+      st.markdown(
+          "> **गुरू आत्मकारक:** ज्ञान, धर्म, सल्लागार (Consultancy), आणि"
+          " इतरांना मार्ग दाखवणे हा तुमचा आध्यात्मिक मार्ग आहे. समाजात तुमचा"
+          " सल्ला प्रमाण मानला जाईल."
+      )
+    elif ak_planet == "Mars":
+      st.markdown(
+          "> **मंगळ आत्मकारक:** प्रचंड ऊर्जा, धैर्य, इंजिनिअरिंग/टेक्निकल कौशल्य"
+          " आणि कोणत्याही आव्हानावर मात करण्याची वृत्ती. रागावर नियंत्रण ठेवणे"
+          " ही तुमची सर्वात मोठी साधना आहे."
+      )
+    elif ak_planet == "Venus":
+      st.markdown(
+          "> **शुक्र आत्मकारक:** सर्जनशीलता, कला, डिझाइन, लक्झरी आणि आंतरराष्ट्रीय"
+          " संबंधांमधून भाग्योदय."
+      )
+    elif ak_planet == "Moon":
+      st.markdown(
+          "> **चंद्र आत्मकारक:** संवेदनशीलता, जनसंपर्क, मानसशास्त्र आणि लोकांच्या"
+          " गरजा समजून काम करण्याचे प्रचंड कौशल्य."
+      )
+
+    st.subheader(
+        f"२. आजीविका, करिअर आणि संपत्ती (Amatyakaraka: {amk_planet} in House"
+        f" {planets[amk_planet]['house']})"
+    )
+    st.info(
+        f"तुमचा करिअर नियंत्रक ग्रह **{amk_planet}** हा कुंडलीच्या"
+        f" **{planets[amk_planet]['house']} व्या घरात** बसलेला आहे. याचा अर्थ"
+        " तुम्ही दुसऱ्यांवर अवलंबून राहण्यापेक्षा स्वतःची स्वतंत्र"
+        " ओळख/कन्सल्टन्सी, धोरणात्मक सल्लागार किंवा व्यवस्थापकीय निर्णयक्षमतेत"
+        " सर्वोच्च संपत्ती व प्रतिष्ठा मिळवाल."
+    )
+
+    st.subheader(
+        f"३. वैवाहिक जीवन व जोडीदार (Darakaraka: {dk_planet} in House"
+        f" {planets[dk_planet]['house']})"
+    )
+    st.write(
+        f"तुमचा दाराकारक ग्रह **{dk_planet}** आहे. जोडीदार सुशिक्षित, स्वतंत्र"
+        " विचारसरणीचा आणि नात्यामध्ये बौद्धिक समानतेला सर्वाधिक महत्त्व देणारा"
+        " असेल. दोघांमधील संवाद हा वैवाहिक सौख्याचा मुख्य आधार राहील."
+    )
+
+  # --- TAB 2: TIMING OF EVENTS ---
+  with tab_events:
+    st.header("🎯 के. एन. राव इव्हेंट टाइमिंग विंडो (Major Milestones)")
+    st.write(
+        "के. एन. राव यांच्या सिद्धांतानुसार, दशा अनुकूल असताना गोचरीतील **गुरू"
+        " आणि शनी** या दोघांचा दुहेरी प्रभाव (Double Transit) संबंधित घरावर येतो,"
+        " तेव्हाच घटना प्रत्यक्ष घडते."
+    )
+
+    col_e1, col_e2 = st.columns(2)
+    with col_e1:
+      st.success("💼 **करिअरचा सुवर्णकाळ व स्वतःचा उद्योग (Career Peak Window)**")
+      st.markdown(
+          "- **वय ३१ ते ३६ वर्ष:** शनी आणि गुरूचा १० व्या आणि ११ व्या घरावर"
+          " होणारा ट्रान्झिट.\n- **निष्कर्ष:** नोकरीकडून स्वतःच्या स्वतंत्र"
+          " कन्सल्टन्सी/सॉफ्टवेअर किंवा अधिकारयुक्त पदाकडे वाटचाल. हा काळ आर्थिक"
+          " पाया कायमचा मजबूत करेल."
+      )
+
+      st.info("🏡 **घर, वाहन व मालमत्ता खरेदी योग (Property & Assets)**")
+      st.markdown(
+          "- **४ थ्या घरावरील अनुकूल गोचर:** गुरु आणि मंगळाची परस्पर दृष्टी किंवा"
+          " ४ थ्या भावावर शनीचा पायाभूत प्रभाव कायमस्वरूपी स्थावर मालमत्ता मिळवून"
+          " देतो."
+      )
+
+    with col_e2:
+      st.warning("💍 **विवाह व भागीदारीचा काळ (Marriage Window)**")
+      st.markdown(
+          "- **७ व्या घरावरील डबल ट्रान्झिट:** जेव्हा गोचरीचा गुरू ७ व्या घराला"
+          " किंवा ७ व्या घराच्या स्वामीला पाहतो, तेव्हा विवाहाचा योग निश्चित"
+          " होतो.\n- **सल्ला:** घाईगडबडीत निर्णय न घेता कुंडलीतील सप्तमेश आणि"
+          " दाराकारकाचे अंश जुळवून विवाह करणे अत्यंत लाभदायक ठरते."
+      )
+
+  # --- TAB 3: YOGAS ---
+  with tab_yogas:
+    st.header("🌟 तुमच्या कुंडलीत आढळलेले शुभ योग (Classical Yogas)")
+    if yogas_found:
+      for y in yogas_found:
+        with st.expander(f"✨ {y['Yoga']} — {y['Type']}", expanded=True):
+          st.write(y["Description"])
+    else:
+      st.write("कुंडलीतील इतर सूक्ष्म योग कार्यरत आहेत.")
+
+  # --- TAB 4: VIMSHOTTARI DASHA ---
+  with tab_dasha:
+    st.header(
+        "⏱️ विंशोत्तरी महादशा टाईमलाईन (Vimshottari Dasha Calendar - 120 Years)"
+    )
+    st.write(
+        f"जन्मावेळचे नक्षत्र: **{birth_nak}** (अधिपती: **{dasha_timeline[0]['Lord']}**)"
+    )
+    df_dasha = pd.DataFrame(dasha_timeline)
+    st.dataframe(df_dasha, use_container_width=True)
+
+  # --- TAB 5: EPHEMERIS COORDINATES ---
+  with tab_matrix:
+    st.header("📊 अचूक खगोलीय ग्रहस्थिती (Lahiri Ayanamsha)")
+    live_rows = []
+    for p, info in planets.items():
+      live_rows.append({
+          "ग्रह (Planet)": p,
+          "राशी (Sign)": info["sign"],
+          "अंश (Degree in Sign)": f"{info['deg']:.2f}°",
+          "घर (House)": f"House {info['house']}",
+      })
+    st.table(pd.DataFrame(live_rows))
